@@ -1,6 +1,6 @@
+use wandpapier_core::directories::{images_dir, unpack_dir};
 use wandpapier_core::heif::extract::extract_images;
 use wandpapier_core::heif::images::load_images;
-use wandpapier_core::{images_dir, unpack_dir};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
