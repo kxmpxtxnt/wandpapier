@@ -8,7 +8,7 @@ fn create_dir_exists(path: PathBuf) -> Result<PathBuf, Errors> {
 
     match std::fs::create_dir(path.clone()) {
         Ok(_) => Ok(path),
-        Err(err) => Err(Errors::from(err))
+        Err(err) => Err(Errors::DirCreate(err))
     }
 }
 
