@@ -21,6 +21,9 @@ pub fn extract_images(
         std::fs::create_dir(images_path.clone())?;
     }
 
+    let mut encoder = heif.encoder_for_format(CompressionFormat::Undefined)?;
+    encoder.set_quality(EncoderQuality::LossLess)?;
+
     for (i, image) in images.iter().enumerate() {
         let store_file_name = format!("{}-{}.jpg", file_name_without_ext, i);
         let write_file = images_path.join(store_file_name);
@@ -31,10 +34,6 @@ pub fn extract_images(
         }
 
         let mut ctx = HeifContext::new()?;
-
-        let mut encoder = heif.encoder_for_format(CompressionFormat::Undefined)?;
-
-        encoder.set_quality(EncoderQuality::LossLess)?;
 
         ctx.encode_image(image, &mut encoder, None)?;
 
