@@ -12,7 +12,7 @@ async fn main() -> anyhow::Result<()> {
 
     let images = load_images(images_dir()?.join("minecraft.heic")).await?;
 
-    extract_images(images, unpack_dir()?).await?;
+    extract_images(images, unpack_dir()?)?;
 
     Ok(())
 }

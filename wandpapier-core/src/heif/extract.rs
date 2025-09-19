@@ -1,10 +1,9 @@
-use anyhow::Result;
 use libheif_rs as heif;
 use libheif_rs::{CompressionFormat, EncoderQuality, HeifContext};
 use std::path::{Path, PathBuf};
-use crate::directories::unpack_dir;
+use crate::errors::Errors;
 
-pub async fn extract_images(from: (String, Vec<heif::Image>), to: PathBuf) -> Result<Vec<PathBuf>> {
+pub fn extract_images(from: (String, Vec<heif::Image>), to: PathBuf) -> Result<Vec<PathBuf>, Errors> {
     let mut stored_images = vec![];
 
     let heif = heif::LibHeif::new();
@@ -12,7 +11,7 @@ pub async fn extract_images(from: (String, Vec<heif::Image>), to: PathBuf) -> Re
 
     let file_name_without_ext = Path::new(&file_name).file_stem().unwrap().to_string_lossy();
 
-    let images_path = unpack_dir()?.join(file_name_without_ext.to_string());
+    let images_path = to.join(file_name_without_ext.to_string());
 
     std::fs::create_dir(images_path.clone())?;
 

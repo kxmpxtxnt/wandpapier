@@ -1,25 +1,25 @@
 use std::path::PathBuf;
-use anyhow::anyhow;
+use crate::errors::Errors;
 
-fn get_or_load_dir(path: PathBuf) -> anyhow::Result<PathBuf> {
+fn create_dir_exists(path: PathBuf) -> Result<PathBuf, Errors> {
     if path.exists() {
-        return anyhow::Ok(path)
+        return Ok(path);
     }
-
+    
     match std::fs::create_dir(path.clone()) {
-        anyhow::Result::Ok(_) => anyhow::Ok(path),
-        Err(err) => Err(anyhow!(err)),
+       Ok(_) => Ok(path),
+        Err(err) => Err(Errors::from(err))
     }
 }
 
-pub fn user_config_dir() -> anyhow::Result<PathBuf> {
-    get_or_load_dir(glib::user_config_dir().join("wandpapier"))
+pub fn user_config_dir() -> Result<PathBuf, Errors> {
+    create_dir_exists(glib::user_config_dir().join("wandpapier"))
 }
 
-pub fn images_dir() -> anyhow::Result<PathBuf> {
-    get_or_load_dir(user_config_dir()?.join("images"))
+pub fn images_dir() -> Result<PathBuf, Errors> {
+    create_dir_exists(user_config_dir()?.join("images"))
 }
 
-pub fn unpack_dir() -> anyhow::Result<PathBuf> {
-    get_or_load_dir(images_dir()?.join(".unpack"))
+pub fn unpack_dir() -> Result<PathBuf, Errors> {
+    create_dir_exists(images_dir()?.join(".unpack"))
 }

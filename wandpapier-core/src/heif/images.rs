@@ -1,10 +1,10 @@
-use anyhow::{Ok, Result};
+use crate::errors::Errors;
 use libheif_rs as heif;
-use std::path::PathBuf;
 use libheif_rs::{ColorSpace, Image, RgbChroma};
-use tracing::{debug};
+use std::path::PathBuf;
+use tracing::debug;
 
-pub async fn load_images(file: PathBuf) -> Result<(String, Vec<Image>)> {
+pub async fn load_images(file: PathBuf) -> Result<(String, Vec<Image>), Errors> {
     let heif = heif::LibHeif::new();
     let file_path = file.as_path().to_string_lossy();
     let file_name = file.file_name().unwrap().to_string_lossy();
@@ -21,12 +21,7 @@ pub async fn load_images(file: PathBuf) -> Result<(String, Vec<Image>)> {
     let mut images: Vec<Image> = vec![];
 
     for handle in ctx.top_level_image_handles() {
-        let image = heif.decode(
-            &handle,
-            ColorSpace::Rgb(RgbChroma::Rgb),
-            None,
-        )?;
-
+        let image = heif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?;
         images.push(image);
     }
 
