@@ -1,8 +1,8 @@
-use crate::unpack_dir;
 use anyhow::Result;
 use libheif_rs as heif;
 use libheif_rs::{CompressionFormat, EncoderQuality, HeifContext};
 use std::path::{Path, PathBuf};
+use crate::directories::unpack_dir;
 
 pub async fn extract_images(from: (String, Vec<heif::Image>), to: PathBuf) -> Result<Vec<PathBuf>> {
     let mut stored_images = vec![];
