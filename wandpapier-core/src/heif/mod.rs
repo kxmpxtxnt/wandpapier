@@ -1,3 +1,3 @@
+pub mod extract;
 pub mod images;
 pub mod thumbnail;
-pub mod extract;

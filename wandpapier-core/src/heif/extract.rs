@@ -1,7 +1,7 @@
+use crate::errors::Errors;
 use libheif_rs as heif;
 use libheif_rs::{CompressionFormat, EncoderQuality, HeifContext};
 use std::path::{Path, PathBuf};
-use crate::errors::Errors;
 
 pub fn extract_images(from: (String, Vec<heif::Image>), to: PathBuf) -> Result<Vec<PathBuf>, Errors> {
     let mut stored_images = vec![];

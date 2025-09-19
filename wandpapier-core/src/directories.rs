@@ -1,13 +1,13 @@
-use std::path::PathBuf;
 use crate::errors::Errors;
+use std::path::PathBuf;
 
 fn create_dir_exists(path: PathBuf) -> Result<PathBuf, Errors> {
     if path.exists() {
         return Ok(path);
     }
-    
+
     match std::fs::create_dir(path.clone()) {
-       Ok(_) => Ok(path),
+        Ok(_) => Ok(path),
         Err(err) => Err(Errors::from(err))
     }
 }
