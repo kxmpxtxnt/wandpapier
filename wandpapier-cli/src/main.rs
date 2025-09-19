@@ -1,3 +1,4 @@
+use libheif_rs::LibHeif;
 use wandpapier_core::directories::{images_dir, unpack_dir};
 use wandpapier_core::heif::extract::extract_images;
 use wandpapier_core::heif::images::load_images;
@@ -10,9 +11,18 @@ async fn main() -> anyhow::Result<()> {
             .finish(),
     )?;
 
-    let images = load_images(images_dir()?.join("minecraft.heic")).await?;
+    let heif = LibHeif::new();
 
-    extract_images(images, unpack_dir()?)?;
+    for entry in std::fs::read_dir(images_dir()?)? {
+        let path = entry?.path();
+        if !path.is_file() {
+            continue;
+        }
+
+        let images = load_images(&heif, images_dir()?.join(path)).await?;
+
+        extract_images(&heif, images, unpack_dir()?)?;
+    }
 
     Ok(())
 }

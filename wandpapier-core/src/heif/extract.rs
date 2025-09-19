@@ -1,16 +1,16 @@
 use crate::errors::Errors;
 use libheif_rs as heif;
-use libheif_rs::{CompressionFormat, EncoderQuality, HeifContext};
+use libheif_rs::{CompressionFormat, EncoderQuality, HeifContext, LibHeif};
 use std::path::{Path, PathBuf};
 use tracing::debug;
 
 pub fn extract_images(
+    heif: &LibHeif,
     from: (String, Vec<heif::Image>),
     to: PathBuf,
 ) -> Result<Vec<PathBuf>, Errors> {
     let mut stored_images = vec![];
 
-    let heif = heif::LibHeif::new();
     let (file_name, images) = from;
 
     let file_name_without_ext = Path::new(&file_name).file_stem().unwrap().to_string_lossy();
