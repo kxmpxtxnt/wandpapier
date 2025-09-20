@@ -21,7 +21,7 @@ async fn main() -> anyhow::Result<()> {
 
         let images = load_images(&heif, images_dir()?.join(path)).await?;
 
-        extract_images(&heif, images, unpack_dir()?)?;
+        extract_images(&heif, images, unpack_dir()?).await?;
     }
 
     Ok(())
