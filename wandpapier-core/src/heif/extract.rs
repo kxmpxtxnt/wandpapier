@@ -1,16 +1,15 @@
 use crate::errors::Errors;
 use libheif_rs as heif;
 use libheif_rs::{CompressionFormat, EncoderQuality, HeifContext, LibHeif};
+use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 use tracing::debug;
 
-pub fn extract_images(
+pub async fn extract_images(
     heif: &LibHeif,
     from: (String, Vec<heif::Image>),
     to: PathBuf,
 ) -> Result<Vec<PathBuf>, Errors> {
-    let mut stored_images = vec![];
-
     let (file_name, images) = from;
 
     let file_name_without_ext = Path::new(&file_name).file_stem().unwrap().to_string_lossy();
@@ -21,28 +20,37 @@ pub fn extract_images(
         std::fs::create_dir(images_path.clone())?;
     }
 
-    let mut encoder = heif.encoder_for_format(CompressionFormat::Undefined)?;
-    encoder.set_quality(EncoderQuality::LossLess)?;
+    let (sender, receiver) = std::sync::mpsc::channel::<PathBuf>();
 
-    for (i, image) in images.iter().enumerate() {
-        let store_file_name = format!("{}-{}.jpg", file_name_without_ext, i);
-        let write_file = images_path.join(store_file_name);
+    images.into_par_iter().enumerate().try_for_each_with(
+        sender,
+        |sender, (i, image)| -> Result<(), Errors> {
+            let store_file_name = format!("{}-{}.jpg", file_name_without_ext, i);
+            let write_file = images_path.join(store_file_name);
 
-        if write_file.exists() {
-            debug!("Skipping {}", write_file.to_string_lossy());
-            continue;
-        }
+            if write_file.exists() {
+                debug!("Skipping {}", write_file.to_string_lossy());
+                let _ = sender.send(write_file);
+                return Ok(());
+            }
 
-        let mut ctx = HeifContext::new()?;
+            let mut encoder = heif.encoder_for_format(CompressionFormat::Undefined)?;
+            encoder.set_quality(EncoderQuality::LossLess)?;
 
-        ctx.encode_image(image, &mut encoder, None)?;
+            let mut ctx = HeifContext::new()?;
 
-        ctx.write_to_file(write_file.as_path().to_string_lossy().to_string().as_str())?;
+            ctx.encode_image(&image, &mut encoder, None)?;
 
-        stored_images.push(write_file.clone());
+            ctx.write_to_file(write_file.as_path().to_string_lossy().to_string().as_str())?;
 
-        debug!("Successfully created {}.", write_file.to_string_lossy())
-    }
+            debug!("Successfully created {}.", write_file.to_string_lossy());
+
+            let _ = sender.send(write_file);
+            Ok(())
+        },
+    )?;
+
+    let stored_images = receiver.iter().collect();
 
     Ok(stored_images)
 }
